@@ -1,7 +1,7 @@
 """
 Abstract base class for LLM services.
 
-Any LLM provider (OpenAI, Gemini, Claude …) must inherit from this
+Any LLM provider (OpenAI, Gemini, Claude ...) must inherit from this
 class and implement the raw dict-based ``chat_raw`` and
 ``chat_with_tools_raw`` methods.  These are the only two methods the
 agentic loop (SuperAgentService) depends on.
@@ -27,10 +27,10 @@ class BaseLLMService(BaseService):
         Send raw dict messages to the LLM and return a raw dict response.
 
         Args:
-            messages: List of ``{"role": …, "content": …}`` dicts.
+            messages: List of ``{"role": ..., "content": ...}`` dicts.
 
         Returns:
-            ``{"role": "assistant", "content": "…"}``
+            ``{"role": "assistant", "content": "..."}``
         """
         ...
 
@@ -47,11 +47,11 @@ class BaseLLMService(BaseService):
         ``tool_calls`` (list of ``{"id", "name", "arguments"}`` dicts).
 
         Args:
-            messages: List of ``{"role": …, "content": …}`` dicts.
+            messages: List of ``{"role": ..., "content": ...}`` dicts.
             tools: OpenAI-compatible tool/function definitions.
 
         Returns:
-            ``{"role": "assistant", "content": "…", "tool_calls": [...] | None}``
+            ``{"role": "assistant", "content": "...", "tool_calls": [...] | None}``
         """
         ...
 

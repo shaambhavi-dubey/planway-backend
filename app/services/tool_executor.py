@@ -1,5 +1,5 @@
 """
-ToolExecutor — single dispatch point for all tool execution.
+ToolExecutor - single dispatch point for all tool execution.
 
 Routes tool calls to either:
 - **Composio Tool Router** (MCP meta-tools and discovered toolkit tools)
@@ -40,7 +40,7 @@ class ToolExecutor(BaseService):
         self._composio = composio_service
         self._chromadb = chromadb_service
 
-    # ── Lifecycle ──
+    # -- Lifecycle --
 
     async def initialize(self) -> None:
         await super().initialize()
@@ -48,7 +48,7 @@ class ToolExecutor(BaseService):
     async def health_check(self) -> bool:
         return self.is_initialized
 
-    # ── Tool dispatch ──
+    # -- Tool dispatch --
 
     async def execute_tool(
         self,
@@ -62,7 +62,7 @@ class ToolExecutor(BaseService):
 
         Routing logic:
         - **Meta tools** (``COMPOSIO_SEARCH_TOOLS``, ``COMPOSIO_MANAGE_CONNECTIONS``,
-          ``COMPOSIO_MULTI_EXECUTE_TOOL``, …) are forwarded to
+          ``COMPOSIO_MULTI_EXECUTE_TOOL``, ...) are forwarded to
           ``ComposioService.execute_session_meta_tool`` using the session API.
         - Other Composio tools (``{TOOLKIT}_{ACTION}``) are forwarded to
           ``ComposioService.execute_tool_for_user``.
@@ -83,7 +83,7 @@ class ToolExecutor(BaseService):
         if name == "RAG_SEARCH":
             return await self._execute_rag_search(arguments)
 
-        # Default — treat as a Composio tool
+        # Default - treat as a Composio tool
         if self._composio.is_initialized:
             try:
                 loop = asyncio.get_running_loop()
@@ -126,7 +126,7 @@ class ToolExecutor(BaseService):
             "successful": False,
         }
 
-    # ── RAG tool definition (for LLM function-calling) ──
+    # -- RAG tool definition (for LLM function-calling) --
 
     @staticmethod
     def get_rag_tool_definition() -> dict:
@@ -170,7 +170,7 @@ class ToolExecutor(BaseService):
             },
         }
 
-    # ── RAG context helpers ──
+    # -- RAG context helpers --
 
     async def get_rag_context(
         self,
@@ -187,13 +187,13 @@ class ToolExecutor(BaseService):
             similarity_threshold: Distance threshold (defaults to setting).
 
         Returns:
-            List of result dicts from ChromaDB (``id``, ``chunk_text``, …).
+            List of result dicts from ChromaDB (``id``, ``chunk_text``, ...).
         """
         if not settings.RAG_ENABLED:
             return []
 
         if not self._chromadb.is_initialized:
-            logger.debug("ToolExecutor: ChromaDB not initialised — skipping RAG.")
+            logger.debug("ToolExecutor: ChromaDB not initialised - skipping RAG.")
             return []
 
         k = n_results or settings.RAG_TOP_K
@@ -233,7 +233,7 @@ class ToolExecutor(BaseService):
         )
         return "\n".join(lines)
 
-    # ── Classification helper ──
+    # -- Classification helper --
 
     @staticmethod
     def is_composio_tool(name: str) -> bool:
@@ -244,7 +244,7 @@ class ToolExecutor(BaseService):
         parts = name.split("_")
         return len(parts) >= 2 and parts[0].isupper()
 
-    # ── Internal handlers ──
+    # -- Internal handlers --
 
     async def _execute_rag_search(self, arguments: Dict[str, Any]) -> Dict[str, Any]:
         """Handle the internal ``RAG_SEARCH`` tool."""

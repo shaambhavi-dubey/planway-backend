@@ -12,7 +12,7 @@ from typing import Any, Optional
 from pydantic import BaseModel, Field
 
 
-# ── Enums ──
+# -- Enums --
 
 
 class Role(str, Enum):
@@ -24,7 +24,7 @@ class Role(str, Enum):
     TOOL = "tool"
 
 
-# ── Core Models ──
+# -- Core Models --
 
 
 class ToolCall(BaseModel):
@@ -44,7 +44,7 @@ class Message(BaseModel):
     timestamp: datetime = Field(default_factory=datetime.utcnow)
 
 
-# ── API Contracts ──
+# -- API Contracts --
 
 
 class ChatRequest(BaseModel):

@@ -34,17 +34,17 @@ class GeminiEmbeddingService(BaseService):
         self._dimension: int = settings.GEMINI_EMBED_DIMENSION
         self._client: Optional[genai.Client] = None
 
-    # ── Lifecycle ──
+    # -- Lifecycle --
 
     async def initialize(self) -> None:
         if not self._api_key:
             logger.warning(
-                "GeminiEmbeddingService: GEMINI_EMBED_API_KEY is empty — "
+                "GeminiEmbeddingService: GEMINI_EMBED_API_KEY is empty - "
                 "service will remain uninitialised."
             )
             return
 
-        # Validate dimension range (128 – 3072 for gemini-embedding-001)
+        # Validate dimension range (128 - 3072 for gemini-embedding-001)
         if not (128 <= self._dimension <= 3072):
             logger.warning(
                 "Invalid embedding dimension %d. Falling back to 768.",
@@ -71,7 +71,7 @@ class GeminiEmbeddingService(BaseService):
             logger.error("GeminiEmbeddingService health-check failed: %s", exc)
             return False
 
-    # ── Public API (sync) ──
+    # -- Public API (sync) --
 
     def embed_text(
         self,
@@ -83,7 +83,7 @@ class GeminiEmbeddingService(BaseService):
 
         Args:
             text: Input text.
-            task_type: Gemini task type — ``RETRIEVAL_DOCUMENT``,
+            task_type: Gemini task type - ``RETRIEVAL_DOCUMENT``,
                 ``RETRIEVAL_QUERY``, ``SEMANTIC_SIMILARITY``, etc.
 
         Returns:
@@ -115,7 +115,7 @@ class GeminiEmbeddingService(BaseService):
                 normalised = self._normalise(values)
                 latency_ms = (time.perf_counter() - t0) * 1000
                 logger.debug(
-                    "[Embedding] single text — %.2f ms, %d dims",
+                    "[Embedding] single text - %.2f ms, %d dims",
                     latency_ms,
                     len(normalised),
                 )
@@ -125,7 +125,7 @@ class GeminiEmbeddingService(BaseService):
             return None
 
         except Exception as exc:
-            logger.error("Gemini embed_text failed: %s", exc)
+            logger.error("Gemini embed_text failed: %s", exc, exc_info=True)
             return None
 
     def embed_batch(
@@ -138,6 +138,12 @@ class GeminiEmbeddingService(BaseService):
 
         Internally chunks into groups of ``_BATCH_EMBED_MAX`` to stay within
         the Gemini per-request limit.
+
+        FIX: Changed behaviour on total batch failure — instead of raising
+        RuntimeError (which was propagating through asyncio.to_thread and
+        appearing as "failed to store documents"), we now log the error and
+        return empty lists for all items. The caller (ChromaDBService) already
+        handles partial failures by skipping chunks with empty embeddings.
 
         Args:
             texts: List of input texts.
@@ -155,6 +161,7 @@ class GeminiEmbeddingService(BaseService):
         # Track non-empty positions
         indexed = [(i, t.strip()) for i, t in enumerate(texts) if t and t.strip()]
         if not indexed:
+            logger.warning("embed_batch: all input texts are empty")
             return [[] for _ in texts]
 
         embeddings: List[List[float]] = [[] for _ in texts]
@@ -167,14 +174,27 @@ class GeminiEmbeddingService(BaseService):
                 content_list = [t for _, t in chunk]
 
                 t0 = time.perf_counter()
-                result = self._client.models.embed_content(
-                    model=self._model_name,
-                    contents=content_list,  # type: ignore[arg-type]
-                    config=types.EmbedContentConfig(
-                        task_type=task_type,
-                        output_dimensionality=self._dimension,
-                    ),
-                )
+                try:
+                    result = self._client.models.embed_content(
+                        model=self._model_name,
+                        contents=content_list,  # type: ignore[arg-type]
+                        config=types.EmbedContentConfig(
+                            task_type=task_type,
+                            output_dimensionality=self._dimension,
+                        ),
+                    )
+                except Exception as batch_exc:
+                    # FIX: Log the sub-batch failure but continue processing
+                    # remaining batches rather than crashing the whole call.
+                    logger.error(
+                        "embed_batch sub-batch [%d:%d] failed: %s",
+                        start,
+                        start + len(chunk),
+                        batch_exc,
+                        exc_info=True,
+                    )
+                    continue  # leave those positions as []
+
                 total_ms += (time.perf_counter() - t0) * 1000
 
                 if result.embeddings:
@@ -183,39 +203,47 @@ class GeminiEmbeddingService(BaseService):
                         if emb_obj.values is not None:
                             embeddings[orig_idx] = self._normalise(emb_obj.values)
 
-            failed = [i for i, e in enumerate(embeddings) if len(e) == 0]
-            if len(failed) == len(texts):
-                raise RuntimeError(
-                    f"All {len(texts)} embeddings failed. Check Gemini API key and config."
-                )
-            if failed:
-                logger.warning(
-                    "Failed %d / %d embeddings. Indices: %s",
-                    len(failed),
+            failed_count = sum(1 for e in embeddings if len(e) == 0)
+
+            if failed_count == len(texts):
+                # FIX: Return empty lists instead of raising RuntimeError.
+                # Raising here caused an unhandled exception in asyncio.to_thread
+                # that surfaced as a generic "failed to store documents" error
+                # with no useful detail in the logs.
+                logger.error(
+                    "embed_batch: ALL %d embeddings failed. "
+                    "Check GEMINI_EMBED_API_KEY, quota, and model name ('%s').",
                     len(texts),
-                    failed,
+                    self._model_name,
+                )
+                return embeddings  # all empty lists — caller will skip them
+
+            if failed_count:
+                logger.warning(
+                    "embed_batch: %d/%d embeddings failed (will be skipped by caller)",
+                    failed_count,
+                    len(texts),
                 )
 
             logger.info(
-                "[Embedding] batch — %.2f ms total, %d items",
+                "[Embedding] batch complete - %.2f ms total, %d/%d succeeded",
                 total_ms,
+                len(texts) - failed_count,
                 len(texts),
             )
             return embeddings
 
-        except RuntimeError:
-            raise
         except Exception as exc:
-            logger.error("embed_batch error: %s", exc, exc_info=True)
+            logger.error("embed_batch unexpected error: %s", exc, exc_info=True)
             return [[] for _ in texts]
 
-    # ── Properties ──
+    # -- Properties --
 
     @property
     def vector_dimension(self) -> int:
         return self._dimension
 
-    # ── Private helpers ──
+    # -- Private helpers --
 
     def _normalise(self, values: List[float]) -> List[float]:
         """Normalise to unit length (skip for 3072-dim, already normalised)."""

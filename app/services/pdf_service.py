@@ -1,7 +1,7 @@
 """
 PDF parsing and chunking service using LangChain.
 
-Accepts PDF file uploads, extracts text via UnstructuredPDFLoader,
+Accepts PDF file uploads, extracts text via PyPDFLoader (pypdf),
 and splits into overlapping chunks via RecursiveCharacterTextSplitter.
 """
 
@@ -24,8 +24,8 @@ class PDFService(BaseService):
     """
     Parses PDF files and splits them into text chunks with metadata.
 
-    Uses LangChain's ``UnstructuredPDFLoader`` for extraction and
-    ``RecursiveCharacterTextSplitter`` for chunking.
+    Uses LangChain's ``PyPDFLoader`` (pure-Python via pypdf) for extraction
+    and ``RecursiveCharacterTextSplitter`` for chunking.
     """
 
     async def initialize(self) -> None:
@@ -87,14 +87,14 @@ class PDFService(BaseService):
                 tmp.write(file_bytes)
                 tmp_path = tmp.name
 
-            logger.info("Parsing PDF '%s' (%d bytes)…", filename, len(file_bytes))
+            logger.info("Parsing PDF '%s' (%d bytes)...", filename, len(file_bytes))
 
             # Lazy imports to avoid heavy startup cost
-            from langchain_community.document_loaders import UnstructuredPDFLoader
+            from langchain_community.document_loaders import PyPDFLoader
             from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-            # Load PDF
-            loader = UnstructuredPDFLoader(tmp_path, mode="elements")
+            # Load PDF (PyPDFLoader splits by page automatically)
+            loader = PyPDFLoader(tmp_path)
             raw_docs = loader.load()
 
             if not raw_docs:
@@ -152,12 +152,9 @@ class PDFService(BaseService):
 
                 # Carry forward any page info from the loader
                 if hasattr(chunk, "metadata") and chunk.metadata:
-                    page = chunk.metadata.get("page_number")
+                    page = chunk.metadata.get("page")  # PyPDFLoader uses 'page'
                     if page is not None:
                         metadata["page_number"] = page
-                    category = chunk.metadata.get("category")
-                    if category:
-                        metadata["element_category"] = category
 
                 documents.append(text)
                 metadatas.append(metadata)

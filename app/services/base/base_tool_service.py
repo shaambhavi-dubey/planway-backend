@@ -36,6 +36,6 @@ class BaseToolService(BaseService):
         Return a list of available tool definitions.
 
         Each dict should follow the OpenAI function-calling schema:
-        ``{"type": "function", "function": {"name": …, "description": …, "parameters": …}}``.
+        ``{"type": "function", "function": {"name": ..., "description": ..., "parameters": ...}}``.
         """
         ...

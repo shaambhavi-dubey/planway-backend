@@ -24,7 +24,7 @@ This repository serves as an open-source foundation for students, developers, an
 
 ---
 
-## 🚀 Quick Start
+## * Quick Start
 
 To run this project on your local machine, you will need to set up both the backend server and the frontend client.
 

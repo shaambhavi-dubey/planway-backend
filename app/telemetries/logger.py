@@ -22,12 +22,12 @@ class StructuredLogger:
         if not self._logger.handlers:
             handler = logging.StreamHandler(sys.stdout)
             handler.setFormatter(
-                logging.Formatter("%(asctime)s │ %(levelname)-8s │ %(name)s │ %(message)s")
+                logging.Formatter("%(asctime)s | %(levelname)-8s | %(name)s | %(message)s")
             )
             self._logger.addHandler(handler)
             self._logger.setLevel(logging.DEBUG)
 
-    # ── Public API ──
+    # -- Public API --
 
     def _format(self, event_name: str, **kwargs: Any) -> str:
         if kwargs:

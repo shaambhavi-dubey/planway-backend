@@ -1,5 +1,5 @@
 """
-SuperAgent service — agentic orchestrator.
+SuperAgent service - agentic orchestrator.
 
 Coordinates LLM, conversation history, Composio Tool Router, and RAG
 context injection in an agentic loop:
@@ -41,7 +41,7 @@ SYSTEM_PROMPT = (
     "tools (Gmail, GitHub, Slack, etc.)\n"
     "- **Knowledge Base (RAG_SEARCH)**: You have a RAG_SEARCH tool to search uploaded documents "
     "(PDFs, text files) in the knowledge base.\n\n"
-    "## IMPORTANT — When to Use Tools vs. Answer Directly:\n"
+    "## IMPORTANT - When to Use Tools vs. Answer Directly:\n"
     "Not every question requires a tool call. Follow this decision process:\n"
     "1. **Answer directly (NO tool call)** if the question is about general knowledge, greetings, "
     "chitchat, opinions, or anything you can confidently answer from your training data.\n"
@@ -51,8 +51,8 @@ SYSTEM_PROMPT = (
     "\"According to the paper, what is Y?\"\n"
     "3. **Call Composio tools** only when the user explicitly needs to interact with an external "
     "service (send email, create calendar event, open GitHub issue, etc.).\n\n"
-    "**If the user asks a question that you can answer from your own knowledge — even if documents "
-    "have been uploaded — do NOT call any tool. Only invoke RAG_SEARCH when the answer genuinely "
+    "**If the user asks a question that you can answer from your own knowledge - even if documents "
+    "have been uploaded - do NOT call any tool. Only invoke RAG_SEARCH when the answer genuinely "
     "depends on the uploaded document content.**\n\n"
     "## Knowledge Base (RAG) Workflow:\n"
     "- When the user asks a question that clearly relates to uploaded documents, call RAG_SEARCH "
@@ -64,14 +64,14 @@ SYSTEM_PROMPT = (
     "2. **Manage Connections (ALWAYS REQUIRED)**: Call COMPOSIO_MANAGE_CONNECTIONS with the toolkit "
     "name(s) to ensure the user has an active authenticated connection. Pass the relevant "
     "toolkit(s) in the `toolkits` array (e.g. [\"googlecalendar\"]). If the response contains a "
-    "`redirect_url`, share it with the user as a clickable link and **wait** — do NOT proceed to "
+    "`redirect_url`, share it with the user as a clickable link and **wait** - do NOT proceed to "
     "execute until the connection is confirmed active.\n"
     "3. **Execute**: Only AFTER COMPOSIO_MANAGE_CONNECTIONS succeeds, call "
     "COMPOSIO_MULTI_EXECUTE_TOOL to run the actual tool action.\n"
     "4. **Synthesize**: Combine tool results into a comprehensive answer.\n\n"
     "## CRITICAL Rules:\n"
     "- **Do NOT call any tool if the question can be answered from general knowledge.** "
-    "Tool calls have latency — only use them when truly needed.\n"
+    "Tool calls have latency - only use them when truly needed.\n"
     "- **NEVER skip step 2 of the Composio workflow.** You MUST call COMPOSIO_MANAGE_CONNECTIONS "
     "before COMPOSIO_MULTI_EXECUTE_TOOL, even if you think the user is already connected.\n"
     "- If COMPOSIO_MANAGE_CONNECTIONS returns a redirect_url, present it to the user as a clickable "
@@ -100,7 +100,7 @@ class SuperAgentService(BaseService):
         self._composio = composio_service
         self._tool_executor = tool_executor
 
-    # ── Lifecycle ──
+    # -- Lifecycle --
 
     async def initialize(self) -> None:
         await super().initialize()
@@ -108,7 +108,7 @@ class SuperAgentService(BaseService):
     async def health_check(self) -> bool:
         return self.is_initialized
 
-    # ── Helper methods ──
+    # -- Helper methods --
 
     def _inject_rag_context(
         self,
@@ -132,10 +132,10 @@ class SuperAgentService(BaseService):
                 updated = history[: i + 1] + [context_msg] + history[i + 1 :]
                 return updated
 
-        # No system message found — prepend
+        # No system message found - prepend
         return [context_msg] + history
 
-    # ── Auth-required detection ──
+    # -- Auth-required detection --
 
     @staticmethod
     def _extract_auth_info(
@@ -232,7 +232,7 @@ class SuperAgentService(BaseService):
             ),
         }
 
-    # ── Core agentic loop ──
+    # -- Core agentic loop --
 
     async def handle_message(
         self,
@@ -371,7 +371,7 @@ class SuperAgentService(BaseService):
                     "data": {"name": tool_name, "result": tool_result},
                 }
 
-                # ── Auth-required interception ──
+                # -- Auth-required interception --
                 # If COMPOSIO_MANAGE_CONNECTIONS returned a redirect_url the
                 # user has NOT yet connected.  Emit a connection_required event so
                 # the UI can render a "Connect" button and stop the loop.

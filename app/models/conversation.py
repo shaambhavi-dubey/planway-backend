@@ -1,5 +1,5 @@
 """
-ConversationHistory — per-conversation message store with system-message
+ConversationHistory - per-conversation message store with system-message
 preservation, truncation, and model-ready formatting.
 """
 
@@ -44,7 +44,7 @@ class ConversationHistory:
         self.event_name = "conversation_history"
         logger.debug(self.event_name, message="Initialized conversation history manager")
 
-    # ── Add / Extend ──
+    # -- Add / Extend --
 
     def add_conversation_message_to_history(self, role: str, content: Any) -> None:
         """Append a message and truncate if necessary (system message preserved)."""
@@ -68,7 +68,7 @@ class ConversationHistory:
             message=f"Extended history with {len(messages)} messages. Current length: {len(self.history)}",
         )
 
-    # ── System message ──
+    # -- System message --
 
     def set_system_message(self, system_message: str) -> None:
         """Update the system message (in-place at index 0)."""
@@ -80,7 +80,7 @@ class ConversationHistory:
         ):
             self.history[0]["content"] = system_message
 
-    # ── Retrieval ──
+    # -- Retrieval --
 
     def get_history(self) -> List[Dict[str, Any]]:
         """Return the full history list."""
@@ -94,7 +94,7 @@ class ConversationHistory:
         """Return a copy of the history suitable for LLM input."""
         return self.history.copy()
 
-    # ── Mutation ──
+    # -- Mutation --
 
     def replace_last_message(self, role: str, content: Any) -> None:
         """Replace the most recent message (or add if history is empty)."""
@@ -105,7 +105,7 @@ class ConversationHistory:
         self.history[-1] = {"role": role, "content": content}
         logger.debug(self.event_name, message="Replaced last message in history")
 
-    # ── Clear ──
+    # -- Clear --
 
     def clear_history_without_system_message(self) -> None:
         """Remove all messages except the system message at index 0."""

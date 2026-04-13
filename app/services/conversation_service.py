@@ -1,5 +1,5 @@
 """
-Conversation service — manages multiple conversations,
+Conversation service - manages multiple conversations,
 each backed by a ``ConversationHistory`` instance.
 """
 
@@ -31,12 +31,12 @@ class ConversationService(BaseService):
         self._created_at: dict[str, datetime] = {}
         self._default_max_history = default_max_history
 
-    # ── Lifecycle ──
+    # -- Lifecycle --
 
     async def health_check(self) -> bool:
         return self.is_initialized
 
-    # ── Conversation CRUD ──
+    # -- Conversation CRUD --
 
     def create_conversation(
         self,
@@ -92,7 +92,7 @@ class ConversationService(BaseService):
             )
         return summaries
 
-    # ── Message operations (delegates to ConversationHistory) ──
+    # -- Message operations (delegates to ConversationHistory) --
 
     def add_message(self, conversation_id: str, role: str, content: Any) -> None:
         """Append a message to a conversation."""
@@ -130,7 +130,7 @@ class ConversationService(BaseService):
         conv = self._get_conv(conversation_id)
         conv.replace_last_message(role, content)
 
-    # ── System message ──
+    # -- System message --
 
     def set_system_message(self, conversation_id: str, system_message: str) -> None:
         """Update the system message for a conversation."""
@@ -138,7 +138,7 @@ class ConversationService(BaseService):
         conv = self._get_conv(conversation_id)
         conv.set_system_message(system_message)
 
-    # ── Clear ──
+    # -- Clear --
 
     def clear_history(self, conversation_id: str) -> None:
         """Clear all messages in a conversation (including system)."""
@@ -152,14 +152,14 @@ class ConversationService(BaseService):
         conv = self._get_conv(conversation_id)
         conv.clear_history_without_system_message()
 
-    # ── Direct access ──
+    # -- Direct access --
 
     def get_conversation_history_object(self, conversation_id: str) -> ConversationHistory:
         """Return the raw ``ConversationHistory`` instance."""
         self._ensure_initialized()
         return self._get_conv(conversation_id)
 
-    # ── Internal ──
+    # -- Internal --
 
     def _get_conv(self, conversation_id: str) -> ConversationHistory:
         if conversation_id not in self._conversations:

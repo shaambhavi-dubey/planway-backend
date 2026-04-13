@@ -1,5 +1,5 @@
 """
-RAG routes — document ingestion, search, stats, and health.
+RAG routes - document ingestion, search, stats, and health.
 """
 
 from __future__ import annotations
@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/rag", tags=["RAG"])
 
-# ── Module-level service references (set via configure()) ──
+# -- Module-level service references (set via configure()) --
 
 _chromadb: Optional[ChromaDBService] = None
 _embedding: Optional[EmbeddingService] = None
@@ -53,7 +53,7 @@ def _chroma() -> ChromaDBService:
     return _chromadb
 
 
-# ── Endpoints ──
+# -- Endpoints --
 
 
 @router.post("/documents", summary="Ingest documents into ChromaDB")
@@ -72,6 +72,7 @@ async def ingest_documents(req: DocumentIngestRequest):
         ids=req.ids,
     )
     if not result.get("success"):
+        logger.error("Document ingestion failed: %s", result)
         raise HTTPException(status_code=500, detail="Failed to ingest documents")
     return result
 
@@ -206,7 +207,7 @@ async def upload_pdf(
 
     if file.content_type and file.content_type != "application/pdf":
         logger.warning(
-            "Content-Type is '%s' but filename ends with .pdf — proceeding",
+            "Content-Type is '%s' but filename ends with .pdf - proceeding",
             file.content_type,
         )
 

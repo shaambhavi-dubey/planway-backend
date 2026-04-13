@@ -1,7 +1,7 @@
 """
 Concrete LLM service backed by LiteLLM.
 
-Supports any provider that LiteLLM supports (OpenAI, Gemini, Claude, …)
+Supports any provider that LiteLLM supports (OpenAI, Gemini, Claude, ...)
 by simply changing the ``LLM_MODEL`` environment variable.
 
 Provides batch (non-streaming) completions with tool-call support,
@@ -32,11 +32,20 @@ class LLMService(BaseLLMService):
         self._api_key: str = settings.LLM_API_KEY
         self._temperature: float = settings.LLM_TEMPERATURE
 
-    # ── Lifecycle ──
+    # -- Lifecycle --
 
     async def initialize(self) -> None:
         if self._api_key:
-            litellm.api_key = self._api_key
+            # litellm routes auth via provider-specific env vars, not a generic api_key.
+            # Detect provider prefix (e.g. "groq/llama..." -> GROQ_API_KEY).
+            import os
+            provider = self._model.split("/")[0].upper() if "/" in self._model else None
+            if provider:
+                env_var = f"{provider}_API_KEY"
+                os.environ[env_var] = self._api_key
+                logger.info("Set %s from LLM_API_KEY", env_var)
+            else:
+                litellm.api_key = self._api_key
         logger.info(
             "LLMService initialised: model=%s, temperature=%.2f",
             self._model,
@@ -45,7 +54,7 @@ class LLMService(BaseLLMService):
         await super().initialize()
 
     async def health_check(self) -> bool:
-        """Quick health probe — try a tiny completion."""
+        """Quick health probe - try a tiny completion."""
         try:
             resp = await litellm.acompletion(
                 model=self._model,
@@ -57,7 +66,7 @@ class LLMService(BaseLLMService):
             logger.exception("LLM health-check failed")
             return False
 
-    # ── Schema Sanitization (Gemini compatibility) ──
+    # -- Schema Sanitization (Gemini compatibility) --
 
     def _sanitize_schema_for_gemini(self, schema: dict[str, Any]) -> dict[str, Any]:
         """Recursively simplify JSON Schema for Gemini's stricter requirements."""
@@ -109,7 +118,7 @@ class LLMService(BaseLLMService):
             sanitized.append(tool)
         return sanitized
 
-    # ── Internal: single batch call ──
+    # -- Internal: single batch call --
 
     async def _batch_completion(
         self,
@@ -146,7 +155,7 @@ class LLMService(BaseLLMService):
         usage = getattr(response, "usage", None)
         if usage:
             logger.debug(
-                "LLM usage — prompt_tokens=%s, completion_tokens=%s, total=%s",
+                "LLM usage - prompt_tokens=%s, completion_tokens=%s, total=%s",
                 getattr(usage, "prompt_tokens", "?"),
                 getattr(usage, "completion_tokens", "?"),
                 getattr(usage, "total_tokens", "?"),
@@ -154,17 +163,17 @@ class LLMService(BaseLLMService):
 
         return response
 
-    # ── Core API ──
+    # -- Core API --
 
     async def chat_raw(self, messages: list[dict[str, Any]]) -> dict[str, Any]:
         """
         Send raw dict messages and return the assistant reply.
 
         Args:
-            messages: List of ``{"role": …, "content": …}`` dicts.
+            messages: List of ``{"role": ..., "content": ...}`` dicts.
 
         Returns:
-            ``{"role": "assistant", "content": "…"}``
+            ``{"role": "assistant", "content": "..."}``
         """
         self._ensure_initialized()
         logger.debug(
@@ -227,7 +236,7 @@ class LLMService(BaseLLMService):
     def get_model_name(self) -> str:
         return self._model
 
-    # ── Helpers ──
+    # -- Helpers --
 
     @staticmethod
     def _parse_tool_calls(raw_tool_calls: list[Any]) -> list[dict[str, Any]]:
@@ -238,7 +247,7 @@ class LLMService(BaseLLMService):
             raw_tool_calls: ``choice.message.tool_calls`` from LiteLLM.
 
         Returns:
-            List of ``{"id": …, "name": …, "arguments": dict}``.
+            List of ``{"id": ..., "name": ..., "arguments": dict}``.
         """
         parsed: list[dict[str, Any]] = []
         for tc in raw_tool_calls:

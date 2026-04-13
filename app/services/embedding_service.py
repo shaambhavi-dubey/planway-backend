@@ -26,14 +26,14 @@ class EmbeddingService(BaseService):
     def __init__(self, gemini_service: GeminiEmbeddingService) -> None:
         self._gemini = gemini_service
 
-    # ── Lifecycle ──
+    # -- Lifecycle --
 
     async def initialize(self) -> None:
         # GeminiEmbeddingService must already be initialised
         if not self._gemini.is_initialized:
             logger.warning(
                 "EmbeddingService: underlying GeminiEmbeddingService is not "
-                "initialised — embedding calls will fail."
+                "initialised - embedding calls will fail."
             )
             return
         await super().initialize()
@@ -41,7 +41,7 @@ class EmbeddingService(BaseService):
     async def health_check(self) -> bool:
         return self.is_initialized and await self._gemini.health_check()
 
-    # ── Async API ──
+    # -- Async API --
 
     async def embed_content(
         self,

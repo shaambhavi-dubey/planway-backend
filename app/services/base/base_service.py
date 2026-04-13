@@ -18,7 +18,7 @@ class BaseService(ABC):
 
     _initialized: bool = False
 
-    # ── Lifecycle ──
+    # -- Lifecycle --
 
     async def initialize(self) -> None:
         """
@@ -27,7 +27,7 @@ class BaseService(ABC):
         Override this to set up connections, load resources, etc.
         The default implementation simply marks the service as initialised.
         """
-        logger.info("%s initialising…", self.__class__.__name__)
+        logger.info("%s initialising...", self.__class__.__name__)
         self._initialized = True
         logger.info("%s ready.", self.__class__.__name__)
 
@@ -37,7 +37,7 @@ class BaseService(ABC):
 
         Override this to release connections, flush buffers, etc.
         """
-        logger.info("%s shutting down…", self.__class__.__name__)
+        logger.info("%s shutting down...", self.__class__.__name__)
         self._initialized = False
 
     @abstractmethod
@@ -45,7 +45,7 @@ class BaseService(ABC):
         """Return ``True`` if the service is healthy and operational."""
         ...
 
-    # ── Helpers ──
+    # -- Helpers --
 
     @property
     def is_initialized(self) -> bool:

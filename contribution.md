@@ -1,6 +1,6 @@
 # 🤝 Contributing to AI Superagent
 
-Thank you for your interest in contributing to **AI Superagent – ACM Build Your Resume (BYR)**! We welcome contributions from students, developers, and AI enthusiasts who want to help improve this project.
+Thank you for your interest in contributing to **AI Superagent - ACM Build Your Resume (BYR)**! We welcome contributions from students, developers, and AI enthusiasts who want to help improve this project.
 
 This document outlines the guidelines and best practices to help you contribute effectively.
 
@@ -32,7 +32,7 @@ We aim to maintain a welcoming and inclusive environment for everyone.
 
 ---
 
-## 🚀 Getting Started
+## * Getting Started
 
 ### 1. Fork the Repository
 Click the **Fork** button at the top-right corner of this repository to create your own copy.
@@ -66,7 +66,7 @@ git checkout -b feature/your-feature-name
 
 1. **Follow the setup instructions** found in the `README.md`.
 2. **Verify the environment**: Ensure both the backend and frontend run correctly before making changes.
-3. **Stay focused**: Keep changes concise—one feature or fix per branch.
+3. **Stay focused**: Keep changes concise-one feature or fix per branch.
 4. **Quality Code**: Write clean, readable, and maintainable code.
 5. **Documentation**: Update relevant documentation or inline comments if your changes affect how the project works.
 
@@ -173,9 +173,9 @@ If you find a bug or want to suggest an enhancement:
 
 ## 🙌 Thank You
 
-Every contribution — big or small — helps improve this project. We appreciate your effort and dedication to making **AI Superagent** the best it can be.
+Every contribution - big or small - helps improve this project. We appreciate your effort and dedication to making **AI Superagent** the best it can be.
 
-**Let’s build something amazing together!** 🚀
+**Let's build something amazing together!** *
 
 ```
 

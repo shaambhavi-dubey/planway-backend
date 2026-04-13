@@ -1,5 +1,5 @@
 """
-SuperAgent Chat Backend — FastAPI application entry point.
+SuperAgent Chat Backend - FastAPI application entry point.
 
 Bootstraps services, registers routers, and starts the uvicorn server.
 """
@@ -28,16 +28,19 @@ from app.services.pdf_service import PDFService
 from app.services.superagent_service import SuperAgentService
 from app.services.tool_executor import ToolExecutor
 
-# ── Logging ──
+# -- Logging --
 
 logging.basicConfig(
     level=logging.DEBUG if settings.DEBUG else logging.INFO,
-    format="%(asctime)s │ %(levelname)-8s │ %(name)s │ %(message)s",
+    format="%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
+    handlers=[
+        logging.StreamHandler()
+    ]
 )
 
 logger = logging.getLogger(__name__)
 
-# ── Service instances ──
+# -- Service instances --
 
 llm_service = LLMService()
 conversation_service = ConversationService()
@@ -58,23 +61,23 @@ superagent_service = SuperAgentService(
 )
 
 
-# ── Application lifecycle ──
+# -- Application lifecycle --
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup / shutdown lifecycle hook."""
 
-    logger.info("🚀 Starting SuperAgent backend…")
+    logger.info("Starting SuperAgent backend...")
 
     # Initialise active services
     await conversation_service.initialize()
     await llm_service.initialize()
 
-    # Composio — initialises only when COMPOSIO_API_KEY is set
+    # Composio - initialises only when COMPOSIO_API_KEY is set
     await composio_service.initialize()
 
-    # RAG pipeline — initialises only when relevant env vars are set
+    # RAG pipeline - initialises only when relevant env vars are set
     await gemini_embedding_service.initialize()
     await embedding_service.initialize()
     await chromadb_service.initialize()
@@ -97,11 +100,11 @@ async def lifespan(app: FastAPI):
         pdf_service=pdf_service,
     )
 
-    logger.info("✅ All services ready.")
+    logger.info("All services ready.")
 
     yield  # ← application runs here
 
-    logger.info("🛑 Shutting down…")
+    logger.info("Shutting down...")
     await superagent_service.shutdown()
     await tool_executor.shutdown()
     await pdf_service.shutdown()
@@ -113,7 +116,7 @@ async def lifespan(app: FastAPI):
     await conversation_service.shutdown()
 
 
-# ── FastAPI app ──
+# -- FastAPI app --
 
 app = FastAPI(
     title="SuperAgent Chat Backend",
@@ -122,7 +125,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS — allow all origins during development
+# CORS - allow all origins during development
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -131,7 +134,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ── Register routers ──
+# -- Register routers --
 
 app.include_router(health_routes.router)
 app.include_router(chat_routes.router)
@@ -139,7 +142,7 @@ app.include_router(composio_routes.router)
 app.include_router(rag_routes.router)
 
 
-# ── Standalone run ──
+# -- Standalone run --
 
 if __name__ == "__main__":
     uvicorn.run(

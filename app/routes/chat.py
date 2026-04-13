@@ -45,7 +45,7 @@ def configure(
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# WebSocket — SuperAgent agentic chat
+# WebSocket - SuperAgent agentic chat
 # ═══════════════════════════════════════════════════════════════════════
 
 
@@ -96,7 +96,7 @@ async def ws_chat(websocket: WebSocket) -> None:
                 )
                 continue
 
-            # ── Auth-completed: resume the agentic loop ──
+            # -- Auth-completed: resume the agentic loop --
             if msg_type == "auth_completed":
                 if not conversation_id:
                     await websocket.send_json(
@@ -108,7 +108,7 @@ async def ws_chat(websocket: WebSocket) -> None:
                     continue
 
                 logger.info(
-                    "Auth completed for user %s, conversation %s — resuming",
+                    "Auth completed for user %s, conversation %s - resuming",
                     user_id,
                     conversation_id,
                 )
@@ -119,7 +119,7 @@ async def ws_chat(websocket: WebSocket) -> None:
                     await websocket.send_json(event)
                 continue
 
-            # ── Normal chat message ──
+            # -- Normal chat message --
             message = payload.get("message", "").strip()
 
             if not message:

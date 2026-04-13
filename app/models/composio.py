@@ -9,7 +9,7 @@ from typing import Any, Optional
 from pydantic import BaseModel
 
 
-# ── Authorization ──
+# -- Authorization --
 
 
 class AuthorizeToolkitResponse(BaseModel):
@@ -36,7 +36,7 @@ class WaitForConnectionResponse(BaseModel):
     mcp_server: Optional[Any] = None
 
 
-# ── User Auth Configs ──
+# -- User Auth Configs --
 
 
 class UserAuthConfigItem(BaseModel):
@@ -57,7 +57,7 @@ class UserAuthConfigsResponse(BaseModel):
     total_items: int
 
 
-# ── Deletion ──
+# -- Deletion --
 
 
 class DeletedConfigItem(BaseModel):

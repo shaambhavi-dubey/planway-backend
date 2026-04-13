@@ -44,7 +44,7 @@ def _svc() -> ComposioService:
     return composio_service
 
 
-# ── MCP / Session ──
+# -- MCP / Session --
 
 
 @router.get("/mcp-url")
@@ -77,7 +77,7 @@ async def list_connected_toolkits(
     return await svc.get_connected_toolkits(user_id)
 
 
-# ── Authorization ──
+# -- Authorization --
 
 
 @router.post("/authorize", response_model=AuthorizeToolkitResponse)
@@ -107,7 +107,7 @@ async def wait_for_connection(
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
-# ── User Auth Configs ──
+# -- User Auth Configs --
 
 
 @router.get("/auth-configs", response_model=UserAuthConfigsResponse)

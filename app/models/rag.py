@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
 
-# ── API Contracts ──
+# -- API Contracts --
 
 
 class DocumentIngestRequest(BaseModel):
@@ -70,7 +70,7 @@ class CollectionStatsResponse(BaseModel):
     error: Optional[str] = None
 
 
-# ── PDF Upload ──
+# -- PDF Upload --
 
 
 class PDFUploadResponse(BaseModel):
@@ -83,7 +83,7 @@ class PDFUploadResponse(BaseModel):
     status: str = "success"
 
 
-# ── PDF List ──
+# -- PDF List --
 
 
 class PDFListItem(BaseModel):

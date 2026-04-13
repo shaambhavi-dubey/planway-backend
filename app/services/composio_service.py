@@ -2,7 +2,7 @@
 Composio Tool Router service.
 
 Provides session management, toolkit authorization, MCP URL retrieval,
-and user auth-config CRUD — all via Composio's Tool Router and SDK.
+and user auth-config CRUD - all via Composio's Tool Router and SDK.
 """
 
 from __future__ import annotations
@@ -76,7 +76,7 @@ class ComposioService(BaseToolService):
     async def initialize(self) -> None:
         if not self._api_key:
             logger.warning(
-                "ComposioService: COMPOSIO_API_KEY is empty — "
+                "ComposioService: COMPOSIO_API_KEY is empty - "
                 "service will remain uninitialised."
             )
             return
@@ -100,7 +100,7 @@ class ComposioService(BaseToolService):
         )
 
     async def list_tools(self) -> list[dict[str, Any]]:
-        """List tools is not supported directly — use search_tools instead."""
+        """List tools is not supported directly - use search_tools instead."""
         self._ensure_initialized()
         raise NotImplementedError(
             "Use search_tools(user_id, query) for dynamic tool discovery."
@@ -191,7 +191,7 @@ class ComposioService(BaseToolService):
 
         Meta tools (``COMPOSIO_SEARCH_TOOLS``, ``COMPOSIO_MANAGE_CONNECTIONS``,
         ``COMPOSIO_MULTI_EXECUTE_TOOL``, etc.) MUST be executed through this
-        method — they are NOT available via ``tools.execute()``.
+        method - they are NOT available via ``tools.execute()``.
 
         Uses ``client.tool_router.session.execute_meta(session_id, slug, arguments)``.
 
@@ -214,7 +214,7 @@ class ComposioService(BaseToolService):
                 slug=slug,  # type: ignore[arg-type]
                 arguments=arguments,
             )
-            # SessionExecuteMetaResponse — convert to a plain dict
+            # SessionExecuteMetaResponse - convert to a plain dict
             result = response.model_dump() if hasattr(response, "model_dump") else dict(response)
             logger.info(
                 "Executed session meta tool %s (session %s)",
@@ -282,7 +282,7 @@ class ComposioService(BaseToolService):
         Get the Tool Router meta tools for a user session.
 
         Returns the built-in meta tools (COMPOSIO_SEARCH_TOOLS,
-        COMPOSIO_MANAGE_CONNECTIONS, COMPOSIO_MULTI_EXECUTE_TOOL, …) as
+        COMPOSIO_MANAGE_CONNECTIONS, COMPOSIO_MULTI_EXECUTE_TOOL, ...) as
         OpenAI-compatible function-calling definitions **and** the session_id
         needed for ``execute_session_meta_tool``.
 
