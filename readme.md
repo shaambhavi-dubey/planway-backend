@@ -1,7 +1,7 @@
 # 🤖 AI Superagent
 
 Welcome to the **AI Superagent** project!  
-Built and maintained by **shaambhavi-code**, this project showcases practical implementation of modern AI systems using real-world tools and architectures.
+
 
 This repository is designed as a hands-on foundation for developers and AI enthusiasts to explore, experiment, and build intelligent applications powered by large language models.
 
@@ -45,3 +45,11 @@ Clone the repository and set up the backend:
 ```bash
 git clone https://github.com/shaambhavi-code/planway-backend.git
 cd superagent-backend
+
+# Set up the virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows use: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+```
