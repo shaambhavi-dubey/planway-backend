@@ -29,8 +29,8 @@ from app.services.base.base_service import BaseService
 
 logger = logging.getLogger(__name__)
 
-# Max iterations to prevent infinite tool-call loops
-MAX_TOOL_ITERATIONS = 10
+# Max iterations to prevent infinite tool-call loops (limited to 3 to save tokens on free tiers)
+MAX_TOOL_ITERATIONS = 3
 
 SYSTEM_PROMPT = (
     "You are SuperAgent, an intelligent AI assistant with access to real-world tools via Composio "
@@ -442,6 +442,9 @@ class SuperAgentService(BaseService):
 
             # Re-call LLM with updated history
             history = self._conversations.get_formatted_history_for_model(cid)
+
+            # Add a small delay to prevent Groq/Gemini RPM rate limits
+            await asyncio.sleep(1.0)
 
             try:
                 logger.debug(
