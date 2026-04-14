@@ -39,11 +39,13 @@ class LLMService(BaseLLMService):
             # litellm routes auth via provider-specific env vars, not a generic api_key.
             # Detect provider prefix (e.g. "groq/llama..." -> GROQ_API_KEY).
             import os
-            provider = self._model.split("/")[0].upper() if "/" in self._model else None
             if provider:
                 env_var = f"{provider}_API_KEY"
                 os.environ[env_var] = self._api_key
-                logger.info("Set %s from LLM_API_KEY", env_var)
+                # LiteLLM and Google SDKs often expect GOOGLE_API_KEY for Gemini
+                if provider == "GEMINI":
+                    os.environ["GOOGLE_API_KEY"] = self._api_key
+                logger.info("Set API keys for provider %s", provider)
             else:
                 litellm.api_key = self._api_key
         logger.info(

@@ -297,8 +297,15 @@ class SuperAgentService(BaseService):
             available_tools.append(rag_tool_def)
             logger.info("Added RAG_SEARCH tool to available tools")
 
-        # 5. Build history
-        history = self._conversations.get_formatted_history_for_model(cid)
+        # 5. Build history with truncation to save tokens
+        full_history = self._conversations.get_formatted_history_for_model(cid)
+        
+        # Keep the system prompt (first message) and the last 10 messages
+        if len(full_history) > 11:
+            logger.info("Truncating conversation history for user %s", user_id)
+            history = [full_history[0]] + full_history[-10:]
+        else:
+            history = full_history
 
         # 6. Initial LLM call
         try:
