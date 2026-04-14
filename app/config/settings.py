@@ -61,7 +61,21 @@ class Settings(BaseSettings):
     HOST: str = "0.0.0.0"
     PORT: int = 5050
     DEBUG: bool = False
-    CORS_ORIGINS: list[str] = ["http://localhost:3000", "https://planway-frontend.vercel.app"]
+    CORS_ORIGINS: list[str] = [
+        "http://localhost:3000",
+        "https://planway-frontend.vercel.app",
+        "https://planway.vercel.app",
+    ]
+
+    @field_validator("CORS_ORIGINS", mode="before")
+    @classmethod
+    def parse_cors_origins(cls, v: Any) -> list[str]:
+        """Allow CORS_ORIGINS to be a comma-separated string in env vars."""
+        if isinstance(v, str):
+            # If it looks like a JSON list, we could parse it, but let's keep it simple:
+            # Just split by comma.
+            return [s.strip() for s in v.split(",") if s.strip()]
+        return v
 
     @field_validator("*", mode="before")
     @classmethod
