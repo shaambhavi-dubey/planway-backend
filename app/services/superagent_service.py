@@ -99,6 +99,8 @@ class SuperAgentService(BaseService):
         self._conversations = conversation_service
         self._composio = composio_service
         self._tool_executor = tool_executor
+        # Cache for tool definitions: user_id -> (tools, session_id)
+        self._tool_cache: dict[str, tuple[list[Any], str]] = {}
 
     # -- Lifecycle --
 
@@ -271,25 +273,32 @@ class SuperAgentService(BaseService):
         # 2. Add user message
         self._conversations.add_message(cid, ConversationRole.USER.value, message)
 
-        # 3. Get Composio Tool Router meta tools
+        # 3. Get Composio Tool Router meta tools (using cache if available)
         available_tools: list[Any] = []
         session_id: str = ""
+        
         if self._composio.is_initialized:
-            try:
-                loop = asyncio.get_running_loop()
-                tools_and_sid = await loop.run_in_executor(
-                    None,
-                    lambda: self._composio.get_session_tools(user_id),
-                )
-                available_tools, session_id = tools_and_sid
-                logger.info(
-                    "Loaded %d Tool Router meta tools for user %s (session %s)",
-                    len(available_tools),
-                    user_id,
-                    session_id,
-                )
-            except Exception as exc:
-                logger.warning("Failed to get session tools: %s", exc)
+            if user_id in self._tool_cache:
+                available_tools, session_id = self._tool_cache[user_id]
+                logger.info("Using cached tool definitions for user %s", user_id)
+            else:
+                try:
+                    loop = asyncio.get_running_loop()
+                    tools_and_sid = await loop.run_in_executor(
+                        None,
+                        lambda: self._composio.get_session_tools(user_id),
+                    )
+                    available_tools, session_id = tools_and_sid
+                    # Cache the results
+                    self._tool_cache[user_id] = (available_tools, session_id)
+                    logger.info(
+                        "Loaded and cached %d Tool Router meta tools for user %s (session %s)",
+                        len(available_tools),
+                        user_id,
+                        session_id,
+                    )
+                except Exception as exc:
+                    logger.warning("Failed to get session tools: %s", exc)
 
         # 4. Append RAG_SEARCH tool if RAG is enabled
         if settings.RAG_ENABLED and self._tool_executor.is_initialized:
