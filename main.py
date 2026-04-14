@@ -119,16 +119,16 @@ async def lifespan(app: FastAPI):
 # -- FastAPI app --
 
 app = FastAPI(
-    title="SuperAgent Chat Backend",
+    title="Planway Chat Backend",
     description="LLM-powered chatting backend with conversation history and extensible tool execution.",
     version="0.1.0",
     lifespan=lifespan,
 )
 
-# CORS - allow all origins during development
+# CORS - dynamic origins from settings
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://planway-frontend.vercel.app/"],
+    allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
