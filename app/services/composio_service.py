@@ -134,6 +134,12 @@ class ComposioService(BaseToolService):
 
         try:
             tools = self._composio.tools.get(user_id=user_id, search=query)
+            
+            # Limit results to 15 tools to prevent LLM token rate limits (TPM)
+            if tools and len(tools) > 15:
+                logger.warning("search_tools found %d tools, limiting to 15", len(tools))
+                tools = tools[:15]
+                
             logger.info(
                 "search_tools found %d tools for user %s query=%r",
                 len(tools) if tools else 0,
