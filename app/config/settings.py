@@ -59,6 +59,7 @@ class Settings(BaseSettings):
     HOST: str = "0.0.0.0"
     PORT: int = 5050
     DEBUG: bool = False
+    CORS_ORIGINS: list[str] = ["http://localhost:3000", "https://planway-frontend.vercel.app"]
 
 
 # Singleton instance
