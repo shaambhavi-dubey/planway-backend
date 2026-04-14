@@ -135,10 +135,10 @@ class ComposioService(BaseToolService):
         try:
             tools = self._composio.tools.get(user_id=user_id, search=query)
             
-            # Limit results to 15 tools to prevent LLM token rate limits (TPM)
-            if tools and len(tools) > 15:
-                logger.warning("search_tools found %d tools, limiting to 15", len(tools))
-                tools = tools[:15]
+            # Aggressive limit to 5 tools to stay under Groq's small 12k TPM limit
+            if tools and len(tools) > 5:
+                logger.warning("search_tools found %d tools, limiting to 5", len(tools))
+                tools = tools[:5]
                 
             logger.info(
                 "search_tools found %d tools for user %s query=%r",
