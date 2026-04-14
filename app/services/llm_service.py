@@ -39,6 +39,7 @@ class LLMService(BaseLLMService):
             # litellm routes auth via provider-specific env vars, not a generic api_key.
             # Detect provider prefix (e.g. "groq/llama..." -> GROQ_API_KEY).
             import os
+            provider = self._model.split("/")[0].upper() if "/" in self._model else None
             if provider:
                 env_var = f"{provider}_API_KEY"
                 os.environ[env_var] = self._api_key
