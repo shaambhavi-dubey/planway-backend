@@ -2,7 +2,9 @@
 Application settings loaded from environment variables / .env file.
 """
 
+from typing import Any
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import field_validator
 
 
 class Settings(BaseSettings):
@@ -60,6 +62,14 @@ class Settings(BaseSettings):
     PORT: int = 5050
     DEBUG: bool = False
     CORS_ORIGINS: list[str] = ["http://localhost:3000", "https://planway-frontend.vercel.app"]
+
+    @field_validator("*", mode="before")
+    @classmethod
+    def strip_strings(cls, v: Any) -> Any:
+        """Automatically strip whitespace from all string inputs."""
+        if isinstance(v, str):
+            return v.strip()
+        return v
 
 
 # Singleton instance
