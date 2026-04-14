@@ -99,22 +99,30 @@ class LLMService(BaseLLMService):
 
         return schema
 
-    def _sanitize_tools_for_gemini(self, tools: list[Any]) -> list[Any]:
-        """Sanitize tool definitions for Gemini (no-op for other models)."""
-        if not self._model or "gemini" not in self._model.lower():
+    def _sanitize_tools_for_litellm(self, tools: list[Any]) -> list[Any]:
+        """
+        Sanitize tool definitions for LiteLLM providers.
+        - Gemini: Simplifies JSON schema.
+        - Groq/Others: Removes unsupported fields like 'strict: null'.
+        """
+        if not tools:
             return tools
 
+        is_gemini = self._model and "gemini" in self._model.lower()
         sanitized: list[Any] = []
+
         for tool in tools:
             tool = copy.deepcopy(tool)
-            if (
-                "function" in tool
-                and "parameters" in tool["function"]
-                and isinstance(tool["function"]["parameters"], dict)
-            ):
-                tool["function"]["parameters"] = self._sanitize_schema_for_gemini(
-                    tool["function"]["parameters"]
-                )
+            if "function" in tool:
+                func = tool["function"]
+                # Remove 'strict' if it is None (Fix for Groq 'Value is not nullable')
+                if "strict" in func and func["strict"] is None:
+                    func.pop("strict")
+                
+                # Gemini-specific schema sanitization
+                if is_gemini and "parameters" in func and isinstance(func["parameters"], dict):
+                    func["parameters"] = self._sanitize_schema_for_gemini(func["parameters"])
+            
             sanitized.append(tool)
         return sanitized
 
@@ -211,7 +219,7 @@ class LLMService(BaseLLMService):
             self._model,
         )
 
-        sanitized_tools = self._sanitize_tools_for_gemini(tools)
+        sanitized_tools = self._sanitize_tools_for_litellm(tools)
         response = await self._batch_completion(messages, tools=sanitized_tools)
 
         if not response.choices:
