@@ -126,9 +126,13 @@ app = FastAPI(
 )
 
 # CORS - dynamic origins from settings
+origins = [
+    "http://localhost:3000",
+    "https://planway-app.vercel.app"
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
